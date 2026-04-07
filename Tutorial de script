@@ -1,0 +1,117 @@
+-- HUB PISTOL ARENA: MINI RGB + 120FPS MASSINHA + STRETCH
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+-- Configurações de Resolução (Seu Script)
+getgenv().Resolution = { [".gg/scripters"] = 0.80 }
+local isStretched = false
+
+-- Limpeza de segurança
+if PlayerGui:FindFirstChild("ArenaUltimateHub") then PlayerGui.ArenaUltimateHub:Destroy() end
+
+local Screen = Instance.new("ScreenGui")
+Screen.Name = "ArenaUltimateHub"
+Screen.DisplayOrder = 99999
+Screen.Parent = PlayerGui
+
+-- 1. TOGGLE MINI REDONDO (40x40)
+local ToggleBtn = Instance.new("ImageButton")
+ToggleBtn.Size = UDim2.new(0, 40, 0, 40) 
+ToggleBtn.Position = UDim2.new(0.1, 0, 0.2, 0)
+ToggleBtn.Image = "rbxassetid://121951288104902" -- ID Convertido para Image
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true
+ToggleBtn.Parent = Screen
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(1, 0)
+Corner.Parent = ToggleBtn
+
+-- 2. BORDA RGB
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 2
+UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+UIStroke.Parent = ToggleBtn
+
+task.spawn(function()
+    while task.wait() do
+        local hue = tick() % 4 / 4
+        UIStroke.Color = Color3.fromHSV(hue, 1, 1)
+    end
+end)
+
+-- 3. O HUB (MENU)
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 140, 0, 100)
+MainFrame.Position = UDim2.new(1.2, 5, 0, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.Visible = false
+MainFrame.Parent = ToggleBtn
+Instance.new("UICorner", MainFrame)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- 4. BOTÃO 120 FPS + GRÁFICO DE MASSINHA
+local FPSBtn = Instance.new("TextButton")
+FPSBtn.Size = UDim2.new(0.9, 0, 0, 35)
+FPSBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
+FPSBtn.Text = "120 FPS + LISO"
+FPSBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+FPSBtn.TextColor3 = Color3.new(1, 1, 1)
+FPSBtn.Font = Enum.Font.GothamBold
+FPSBtn.TextSize = 10
+FPSBtn.Parent = MainFrame
+Instance.new("UICorner", FPSBtn)
+
+FPSBtn.MouseButton1Click:Connect(function()
+    FPSBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
+    FPSBtn.Text = "FPS & MASSINHA: ON"
+    
+    -- Destrava FPS
+    if setfpscap then setfpscap(120) end
+    
+    -- Aplica Gráfico de Massinha (Liso)
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            v.Transparency = 1
+        end
+    end
+    
+    -- Otimização de Iluminação
+    game.Lighting.GlobalShadows = false
+    game.Lighting.FogEnd = 9e9
+    settings().Rendering.QualityLevel = 1
+end)
+
+-- 5. BOTÃO ESTICAR (SEU SCRIPT)
+local StretchBtn = Instance.new("TextButton")
+StretchBtn.Size = UDim2.new(0.9, 0, 0, 35)
+StretchBtn.Position = UDim2.new(0.05, 0, 0.55, 0)
+StretchBtn.Text = "ESTICAR TELA"
+StretchBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+StretchBtn.TextColor3 = Color3.new(1, 1, 1)
+StretchBtn.Font = Enum.Font.GothamBold
+StretchBtn.TextSize = 10
+StretchBtn.Parent = MainFrame
+Instance.new("UICorner", StretchBtn)
+
+StretchBtn.MouseButton1Click:Connect(function()
+    isStretched = not isStretched
+    StretchBtn.BackgroundColor3 = isStretched and Color3.fromRGB(0, 255, 120) or Color3.fromRGB(35, 35, 35)
+end)
+
+-- 6. LOOP DA RESOLUÇÃO
+RunService.RenderStepped:Connect(function()
+    if isStretched then
+        Camera.CFrame = Camera.CFrame * CFrame.new(0, 0, 0, 1, 0, 0, 0, getgenv().Resolution[".gg/scripters"], 0, 0, 0, 1)
+    end
+end)
+
