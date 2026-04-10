@@ -1,0 +1,151 @@
+-- HUB PISTOL ARENA: FREEZA AUXÍLIO (MIRA COMPLETA)
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+getgenv().Resolution = { [".gg/scripters"] = 0.80 }
+local isStretched = false
+
+-- Limpeza
+if PlayerGui:FindFirstChild("ArenaUltimateHub") then PlayerGui.ArenaUltimateHub:Destroy() end
+
+local Screen = Instance.new("ScreenGui")
+Screen.Name = "ArenaUltimateHub"
+Screen.Parent = PlayerGui
+Screen.ResetOnSpawn = false
+Screen.IgnoreGuiInset = true -- Garante o centro absoluto
+
+-- ==========================================
+-- MIRA IGUAL À FOTO (COM BOLINHA NO MEIO)
+-- ==========================================
+local CrosshairBase = Instance.new("Frame")
+CrosshairBase.Name = "CustomCrosshair"
+CrosshairBase.Size = UDim2.new(0, 0, 0, 0) 
+CrosshairBase.Position = UDim2.new(0.5, 0, 0.5, 0)
+CrosshairBase.AnchorPoint = Vector2.new(0.5, 0.5)
+CrosshairBase.BackgroundTransparency = 1
+CrosshairBase.Visible = false
+CrosshairBase.Parent = Screen
+
+local function CreateLine(size, pos)
+    local l = Instance.new("Frame", CrosshairBase)
+    l.BackgroundColor3 = Color3.new(1, 1, 1)
+    l.BorderSizePixel = 0
+    l.Size = size
+    l.Position = pos
+    l.AnchorPoint = Vector2.new(0.5, 0.5)
+    Instance.new("UICorner", l).CornerRadius = UDim.new(1, 0)
+    return l
+end
+
+-- A BOLINHA QUE FALTAVA
+local CentralDot = CreateLine(UDim2.new(0, 6, 0, 6), UDim2.new(0, 0, 0, 0))
+
+-- OS TRAÇOS DA CRUZ
+CreateLine(UDim2.new(0, 3, 0, 15), UDim2.new(0, 0, 0, -18)) -- Cima
+CreateLine(UDim2.new(0, 3, 0, 15), UDim2.new(0, 0, 0, 18))  -- Baixo
+CreateLine(UDim2.new(0, 15, 0, 3), UDim2.new(0, -18, 0, 0)) -- Esquerda
+CreateLine(UDim2.new(0, 15, 0, 3), UDim2.new(0, 18, 0, 0))  -- Direita
+
+-- ==========================================
+-- INTERFACE DO HUB
+-- ==========================================
+local ToggleBtn = Instance.new("ImageButton")
+ToggleBtn.Size = UDim2.new(0, 40, 0, 40) 
+ToggleBtn.Position = UDim2.new(0.1, 0, 0.2, 0)
+ToggleBtn.Image = "rbxassetid://107499770195492" 
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+ToggleBtn.Draggable = true
+ToggleBtn.Active = true
+ToggleBtn.Parent = Screen
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 2
+UIStroke.Parent = ToggleBtn
+task.spawn(function()
+    while task.wait() do
+        UIStroke.Color = Color3.fromHSV(tick() % 4 / 4, 1, 1)
+    end
+end)
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 140, 0, 210)
+MainFrame.Position = UDim2.new(1.2, 5, 0, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.Visible = false
+MainFrame.Parent = ToggleBtn
+Instance.new("UICorner", MainFrame)
+
+ToggleBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 25)
+Title.Text = "AUXÍLIO FREEZA"
+Title.TextColor3 = Color3.fromRGB(170, 0, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 11
+Title.Parent = MainFrame
+
+local Credit = Instance.new("TextLabel")
+Credit.Size = UDim2.new(1, 0, 0, 15)
+Credit.Position = UDim2.new(0, 0, 0, 22)
+Credit.Text = "By Axius"
+Credit.TextColor3 = Color3.fromRGB(200, 200, 200)
+Credit.TextTransparency = 0.68
+Credit.BackgroundTransparency = 1
+Credit.Font = Enum.Font.GothamMedium
+Credit.TextSize = 9
+Credit.Parent = MainFrame
+
+local function CreateBtn(txt, pos)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(0.9, 0, 0, 30)
+    b.Position = pos
+    b.Text = txt
+    b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 10
+    b.Parent = MainFrame
+    Instance.new("UICorner", b)
+    return b
+end
+
+local FPSBtn = CreateBtn("120 FPS + LISO", UDim2.new(0.05, 0, 0.25, 0))
+FPSBtn.MouseButton1Click:Connect(function()
+    FPSBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
+    if setfpscap then setfpscap(120) end
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+    end
+end)
+
+local StBtn = CreateBtn("ESTICAR TELA", UDim2.new(0.05, 0, 0.42, 0))
+StBtn.MouseButton1Click:Connect(function()
+    isStretched = not isStretched
+    StBtn.BackgroundColor3 = isStretched and Color3.fromRGB(0, 255, 120) or Color3.fromRGB(35, 35, 35)
+end)
+
+local MiraOn = CreateBtn("MIRA: ON", UDim2.new(0.05, 0, 0.59, 0))
+MiraOn.MouseButton1Click:Connect(function()
+    CrosshairBase.Visible = true
+    MiraOn.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
+    MainFrame:FindFirstChild("MiraOffBtn").BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+end)
+
+local MiraOff = CreateBtn("MIRA: OFF", UDim2.new(0.05, 0, 0.76, 0))
+MiraOff.Name = "MiraOffBtn"
+MiraOff.MouseButton1Click:Connect(function()
+    CrosshairBase.Visible = false
+    MiraOff.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
+    MiraOn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+end)
+
+RunService.RenderStepped:Connect(function()
+    if isStretched then
+        Camera.CFrame = Camera.CFrame * CFrame.new(0, 0, 0, 1, 0, 0, 0, getgenv().Resolution[".gg/scripters"], 0, 0, 0, 1)
+    end
+end)
