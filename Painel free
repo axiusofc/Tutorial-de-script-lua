@@ -119,7 +119,7 @@ Botao.MouseButton1Click:Connect(function()
         
         -- EXECUTA O SCRIPT DO GITHUB APÓS O LOGIN
         pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/axiusofc/Tutorial-de-script-lua/main/Painel%20free"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/axiusofc/Tutorial-de-script-lua/refs/heads/main/Tutorial%20de%20script"))()
         end)
         
         print("Script carregado com sucesso!")
