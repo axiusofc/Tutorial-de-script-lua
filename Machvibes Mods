@@ -1,0 +1,136 @@
+local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
+local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+-- // CONFIGURAÇÕES
+local volumeJogo = 1 
+local sonsMecanicos = {"rbxassetid://98896912986438", "rbxassetid://110690350989330", "rbxassetid://125236580407249"}
+-- Trocamos para Arcade (Fonte Nativa Pixelada) para garantir que funcione sempre
+local FONT_PIXEL = Enum.Font.Arcade 
+
+-- // GRUPO DE SOM (ANTI-LAG)
+local JogoGroup = SoundService:FindFirstChild("MinecraftVolumeControl") or Instance.new("SoundGroup", SoundService)
+JogoGroup.Name = "MinecraftVolumeControl"
+
+local function organizarSons(obj)
+    if obj:IsA("Sound") and not obj:IsDescendantOf(SoundService) then
+        obj.SoundGroup = JogoGroup
+    end
+end
+game.DescendantAdded:Connect(organizarSons)
+for _, v in pairs(game:GetDescendants()) do organizarSons(v) end
+
+-- // FUNÇÃO DO CLIQUE
+local function playClick()
+    local s = Instance.new("Sound", SoundService)
+    s.SoundId = sonsMecanicos[math.random(#sonsMecanicos)]
+    s.Volume = 10
+    s.PlaybackSpeed = math.random(95, 105) / 100
+    local eq = Instance.new("EqualizerSoundEffect", s)
+    eq.HighGain, eq.MidGain, eq.LowGain = 20, 20, 20
+    s:Play()
+    s.Ended:Connect(function() s:Destroy() end)
+end
+
+-- // INTERFACE
+local sg = Instance.new("ScreenGui", PlayerGui)
+sg.ResetOnSpawn = false
+
+local main = Instance.new("Frame", sg)
+main.Size = UDim2.new(0, 260, 0, 160)
+main.Position = UDim2.new(0.5, -130, 0.5, -80)
+main.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+
+-- CONTORNO DA JANELA
+local mainStroke = Instance.new("UIStroke", main)
+mainStroke.Thickness = 4
+mainStroke.Color = Color3.new(0, 0, 0)
+
+-- Título
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.Font = FONT_PIXEL -- Aplicando Arcade
+title.Text = "Mechvibes RBLX"
+title.TextColor3 = Color3.new(170, 0, 255)
+title.TextSize = 22
+
+local titleStroke = Instance.new("UIStroke", title)
+titleStroke.Thickness = 3
+titleStroke.Color = Color3.new(0, 0, 0)
+
+-- Barra de Volume
+local sliderBack = Instance.new("Frame", main)
+sliderBack.Size = UDim2.new(0, 220, 0, 20)
+sliderBack.Position = UDim2.new(0.5, -110, 0, 70)
+sliderBack.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+local barStroke = Instance.new("UIStroke", sliderBack)
+barStroke.Thickness = 3
+barStroke.Color = Color3.new(0, 0, 0)
+
+local sliderMain = Instance.new("Frame", sliderBack)
+sliderMain.Size = UDim2.new(1, 0, 1, 0)
+sliderMain.BackgroundColor3 = Color3.fromRGB(124, 252, 0)
+sliderMain.BorderSizePixel = 0
+
+local sliderBtn = Instance.new("Frame", sliderMain)
+sliderBtn.Size = UDim2.new(0, 12, 1, 6)
+sliderBtn.Position = UDim2.new(1, -6, 0.5, -13)
+sliderBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+
+local btnStroke = Instance.new("UIStroke", sliderBtn)
+btnStroke.Thickness = 2
+btnStroke.Color = Color3.new(0, 0, 0)
+
+-- Texto do Volume
+local volText = Instance.new("TextLabel", main)
+volText.Size = UDim2.new(1, 0, 0, 30)
+volText.Position = UDim2.new(0, 0, 0, 110)
+volText.BackgroundTransparency = 1
+volText.Font = FONT_PIXEL -- Aplicando Arcade
+volText.Text = "VOLUME JOGO: 100%"
+volText.TextColor3 = Color3.new(1, 1, 1)
+volText.TextSize = 18
+
+local volStroke = Instance.new("UIStroke", volText)
+volStroke.Thickness = 2.5
+volStroke.Color = Color3.new(0, 0, 0)
+
+-- // LÓGICA
+local dragging = false
+local function updateSlider()
+    if dragging then
+        local mousePos = UserInputService:GetMouseLocation().X
+        local relativePos = math.clamp((mousePos - sliderBack.AbsolutePosition.X) / sliderBack.AbsoluteSize.X, 0, 1)
+        sliderMain.Size = UDim2.new(relativePos, 0, 1, 0)
+        volumeJogo = relativePos
+        volText.Text = "VOLUME JOGO: " .. math.floor(relativePos * 100) .. "%"
+        JogoGroup.Volume = volumeJogo
+    end
+end
+
+sliderBack.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        updateSlider()
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+RunService.RenderStepped:Connect(updateSlider)
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Keyboard or input.UserInputType == Enum.UserInputType.Touch then
+        playClick()
+    end
+end)
